@@ -18,17 +18,24 @@ app.config['MYSQL_DB'] = os.getenv("MYSQL_DB", "yourdbname")
 mysql = MySQL(app)
 
 # ✅ Create: Add new user
-@app.route('/users', methods=['POST'])
+@app.route("/users/add", methods=["POST"])
 def add_user():
-        data = request.get_json()
-        name = data.get('name')
-        email = data.get('email')
+    data = request.get_json()
+    name = data.get("name")
+    email = data.get("email")
 
+    if not name or not email:
+        return jsonify({"error": "Name and email are required"}), 400
+
+    try:
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO users(name, email) VALUES(%s, %s)", (name, email))
+        cur.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (name, email))
         mysql.connection.commit()
         cur.close()
-        return jsonify({"message": "User added successfully!"}), 201
+        return jsonify({"message": "User added successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
  # ✅ Read: Get all users
 @app.route('/users', methods=['GET'])
@@ -68,6 +75,5 @@ def delete_user(id):
 def index():
         return "Flask app is running with RDS MySQL!"
 
-if __name__ == '__main__':
-        app.run(debug=True)
-
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
