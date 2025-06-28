@@ -1,21 +1,17 @@
-from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+# for lambda function
 import pymysql
+import json
 import os
 
-# Load environment variables
-load_dotenv()
 
-app = Flask(__name__)
-
-# ✅ MySQL RDS Connection
+# ✅ MySQL RDS Connection using Lambda environment variables
 def get_db_connection():
     return pymysql.connect(
-        host=os.getenv("MYSQL_HOST", "your-rds-endpoint.rds.amazonaws.com"),
-        user=os.getenv("MYSQL_USER", "admin"),
-        password=os.getenv("MYSQL_PASSWORD", "your-password"),
-        database=os.getenv("MYSQL_DB", "yourdbname"),
-        cursorclass=pymysql.cursors.Cursor  # Optional: DictCursor if you want JSON-like results directly
+        host=os.getenv("MYSQL_HOST"),
+        user=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD"),
+        database=os.getenv("MYSQL_DB"),
+        cursorclass=pymysql.cursors.Cursor  # Use DictCursor if preferred
     )
 
 @app.route("/users/add", methods=["POST"])
@@ -74,7 +70,7 @@ def delete_user(id):
 
 @app.route("/", methods=["GET"])
 def index():
-    return "Flask app running with PyMySQL!"
+    return "Flask app running with PyMySQL on Lambda!"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
